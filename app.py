@@ -300,55 +300,20 @@ with tab1:
         st.plotly_chart(wf, width='stretch')
 
     with right:
-        st.subheader("Does it cover year-1 cost?")
-        monthly_cash = R["cash"] / 12
-        xs = [i / 10 for i in range(0, 121)]                      # months 0..12
-        cum = [m * monthly_cash for m in xs]
-        cost_line = [R["cost1"]] * len(xs)
-        clipped = [max(c, R["cost1"]) for c in cum]               # shaded surplus above the cost line
-        cov = go.Figure()
-        cov.add_trace(go.Scatter(x=xs, y=cost_line, mode="lines", name="Year-1 cost (reference)",
-                                 line=dict(color=CORAL, width=2.5, dash="dash")))
-        cov.add_trace(go.Scatter(x=xs, y=clipped, mode="lines", line=dict(width=0), fill="tonexty",
-                                 fillcolor="rgba(27,138,152,0.18)", showlegend=False, hoverinfo="skip"))
-        cov.add_trace(go.Scatter(x=xs, y=cum, mode="lines", name="Cumulative cash savings",
-                                 line=dict(color=TEAL, width=3)))
-        cov.add_trace(go.Scatter(x=list(range(13)), y=[m * monthly_cash for m in range(13)], mode="markers",
-                                 marker=dict(color=TEAL, size=6), showlegend=False,
-                                 hovertemplate="Month %{x}<br>€%{y:,.0f}<extra></extra>"))
-        if R["cover"] is not None and R["cover"] <= 12:
-            cov.add_trace(go.Scatter(x=[R["cover"]], y=[R["cost1"]], mode="markers", showlegend=False,
-                                     marker=dict(color="white", size=12, line=dict(color=INK, width=3)),
-                                     hovertemplate="Covered in month %{x:.1f}<extra></extra>"))
-            cov.add_annotation(x=R["cover"], y=R["cost1"], text=f"<b>Covered in month {R['cover']:.1f}</b>",
-                               showarrow=True, arrowhead=0, ax=60, ay=-45, font=dict(color=INK, size=12),
-                               bgcolor="white", bordercolor=LINE)
-        cov.add_annotation(x=12, y=R["cost1"], text=f"Year-1 cost {eur_k(R['cost1'])}", showarrow=False,
-                           xanchor="right", yanchor="top", yshift=-6, font=dict(color=CORAL, size=11))
-        cov.add_annotation(x=12, y=cum[-1], text=f"<b>Net {eur_k(R['net'])}</b>", showarrow=False,
-                           xanchor="right", yanchor="bottom", yshift=4, font=dict(color=TEAL, size=12))
-        style(cov, legend=dict(orientation="h", y=-0.22), xaxis=dict(title="Month after go-live", dtick=1),
-              yaxis=dict(title="Cumulative (€)", tickformat=",.0f", rangemode="tozero"))
-        st.plotly_chart(cov, width='stretch')
-        if R["cover"] is None or R["cover"] > 12:
-            st.warning("At these settings, savings do not reach the year-1 cost within 12 months.")
-        st.caption("Teal line: cumulative cash savings. Dashed line: year-1 cost (software + setup). "
-                   "This differs from the payback KPI, which compares only the one-off setup with monthly net savings.")
-
-    st.subheader("Three scenarios side by side")
-    st.caption("Same invoice volumes, prices and costs as in the sidebar. Only time cut and cash share change.")
-    rows = []
-    for name, lv in SCENARIOS.items():
-        r = calc(variant(P, time_cut=lv["time_cut"] / 100, share=lv["share"] / 100))
-        rows.append((name, r))
-    cmp_fig = go.Figure(go.Bar(
-        x=[n for n, _ in rows], y=[r["net"] for _, r in rows],
-        marker_color=[TEAL_LIGHT, TEAL, TEAL_LIGHT],
-        text=[f"{eur_k(r['net'])}<br>payback {r['payback']:.1f} mo" if r["payback"] else eur_k(r["net"]) for _, r in rows],
-        textposition="outside",
-    ))
-    style(cmp_fig, showlegend=False, yaxis=dict(visible=False), height=320)
-    st.plotly_chart(cmp_fig, width='stretch')
+        st.subheader("Three scenarios side by side")
+        st.caption("Same volumes, prices and costs as in the sidebar. Only time cut and cash share change.")
+        rows = []
+        for name, lv in SCENARIOS.items():
+            r = calc(variant(P, time_cut=lv["time_cut"] / 100, share=lv["share"] / 100))
+            rows.append((name, r))
+        cmp_fig = go.Figure(go.Bar(
+            x=[n for n, _ in rows], y=[r["net"] for _, r in rows],
+            marker_color=[TEAL_LIGHT, TEAL, TEAL_LIGHT],
+            text=[f"{eur_k(r['net'])}<br>payback {r['payback']:.1f} mo" if r["payback"] else eur_k(r["net"]) for _, r in rows],
+            textposition="outside",
+        ))
+        style(cmp_fig, showlegend=False, yaxis=dict(visible=False))
+        st.plotly_chart(cmp_fig, width='stretch')
 
 # ---- Tab 2: what changes for the CFO ---------------------------------------------
 with tab2:
@@ -460,6 +425,29 @@ with tab3:
           title=dict(text="Cash savings by use case (€ per year)", font=dict(size=14), x=0))
     st.plotly_chart(uc_fig, width='stretch')
 
+    st.markdown("---")
+    st.subheader("Already proven by BLP: Migros")
+    p1, p2 = st.columns([3, 2])
+    with p1:
+        st.markdown(
+            "<div class='uc'><h4>Switzerland's largest retailer runs BLP in accounts payable</h4>"
+            "<div class='row'><span>Selection</span><b>Chosen after a trial on 500 real invoices</b></div>"
+            "<div class='row'><span>Speed</span><b>First Migros company live 7–8 weeks after signing</b></div>"
+            "<div class='row'><span>SAP integration</span><b>About 3 days</b></div>"
+            "<div class='row'><span>Effort</span><b>30–40% fewer resources needed</b></div>"
+            "<div class='row'><span>Since then</span><b>Rolling out to further areas and processes</b></div></div>",
+            unsafe_allow_html=True,
+        )
+    with p2:
+        st.markdown(
+            "**Proof and sources**\n\n"
+            "- [BLP customer page: Migros](https://blp.digital/resources/our-customers/migros)\n"
+            "- [IHL Group analysis of the Migros rollout](https://www.ihlservices.com/?p=42687)\n"
+            "- [BLP funding news, with Migros quote](https://pulse2.com/blp-digital-50-million-investment-from-goldman-sachs-alternatives-to-scale-agentic-ai-for-core-finance-processes/)"
+        )
+        st.caption("How we use it: it supports our 3-day ERP integration assumption and shows the tool works with SAP. "
+                   "The 30–40% effort reduction is below our 50–70% scenarios, so it does not validate them.")
+
     d1, d2 = st.columns(2)
     with d1:
         st.markdown("**What we have already done**")
@@ -553,10 +541,11 @@ with tab4:
 
 # ---- Tab 5: what if wrong ------------------------------------------------------
 with tab5:
-    st.subheader("How much does it hurt if one assumption is worse than we think?")
+    st.subheader("If we are wrong, does the case still hold?")
     st.markdown(
-        "Each bar shows the **year-1 net value if only that one input is worse**. Everything else stays at your "
-        "current settings. The dashed line is your current result. A bar that stops short of the line shows how much value is lost."
+        "Each bar is the **cash savings in year 1 if only that one input is worse**. The dashed line is the "
+        f"**total year-1 cost ({eur_k(R['cost1'])}: software + setup)**. A bar that reaches past the dashed line "
+        "means the savings still cover the cost. The gap is the net value."
     )
 
     tests = {
@@ -566,7 +555,7 @@ with tab5:
         "Labour cost €5 per hour lower": dict(labour=max(P["labour"] - 5, 0)),
         "Rollout costs €19.5k (ISR package)": dict(setup=19500),
     }
-    results = {name: calc(variant(P, **ch))["net"] for name, ch in tests.items()}
+    cases = {name: calc(variant(P, **ch)) for name, ch in tests.items()}
 
     st.markdown("**Stress test: combine problems**")
     chosen = st.multiselect(
@@ -576,26 +565,40 @@ with tab5:
     combined = {}
     for name in chosen:
         combined.update(tests[name])
-    stress_net = calc(variant(P, **combined))["net"] if chosen else R["net"]
-    stress_label = "Stress test"
-    names_w = list(results) + [stress_label]
-    values = list(results.values()) + [stress_net]
-    order = sorted(range(len(names_w)), key=lambda i: values[i])
-    fig = go.Figure(go.Bar(
-        y=[names_w[i] for i in order], x=[values[i] for i in order], orientation="h",
-        marker_color=[CORAL if names_w[i] == stress_label else TEAL_LIGHT for i in order],
-        text=[eur_k(values[i]) for i in order], textposition="inside", insidetextanchor="end",
+    stress = calc(variant(P, **combined)) if chosen else R
+
+    names_w = list(cases) + ["Stress test (your selection)"]
+    rs = list(cases.values()) + [stress]
+    order = sorted(range(len(rs)), key=lambda i: rs[i]["cash"])
+    is_stress = [names_w[i].startswith("Stress") for i in order]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=[names_w[i] for i in order], x=[rs[i]["cash"] for i in order], orientation="h",
+        marker_color=[CORAL if st_ else TEAL_LIGHT for st_ in is_stress],
+        text=[f"{eur_k(rs[i]['cash'])} savings  →  net {eur_k(rs[i]['net'])}" for i in order],
+        textposition="inside", insidetextanchor="start", name="Cash savings in year 1",
     ))
-    fig.add_vline(x=R["net"], line_dash="dash", line_color=TEAL,
-                  annotation_text=f"Current {eur_k(R['net'])}", annotation_position="top")
-    style(fig, showlegend=False, xaxis=dict(title="Year-1 net value (€)", tickformat=",.0f", rangemode="tozero"),
-          height=380, margin=dict(l=10, r=10, t=50, b=10))
+    diff = [i for i in order if abs(rs[i]["cost1"] - R["cost1"]) > 1]
+    if diff:
+        fig.add_trace(go.Scatter(
+            x=[rs[i]["cost1"] for i in diff], y=[names_w[i] for i in diff], mode="markers", name="Higher cost in this case",
+            marker=dict(symbol="diamond", size=13, color="white", line=dict(color=CORAL, width=3)),
+            hovertemplate="Year-1 cost %{x:,.0f}<extra></extra>"))
+    fig.add_vline(x=R["cost1"], line_dash="dash", line_width=3, line_color=CORAL,
+                  annotation_text=f"Total year-1 cost {eur_k(R['cost1'])}", annotation_position="top",
+                  annotation_font=dict(color=CORAL, size=12))
+    top = max(rs[i]["cash"] for i in order) * 1.08
+    style(fig, legend=dict(orientation="h", y=-0.18), height=400, margin=dict(l=10, r=10, t=50, b=10),
+          xaxis=dict(title="Cash savings in year 1 (€)", tickformat=",.0f", range=[0, top]))
     st.plotly_chart(fig, width='stretch')
 
+    held = stress["net"] > 0
+    ratio = stress["cash"] / stress["cost1"] if stress["cost1"] else 0
     w1, w2 = st.columns(2)
-    w1.metric("Stress-test year-1 net", eur_k(stress_net), f"{(stress_net - R['net']) / 1000:+,.1f}k vs current")
-    w2.metric("Still positive?", "Yes" if stress_net > 0 else "No",
-              "case holds" if stress_net > 0 else "case breaks", delta_color="normal" if stress_net > 0 else "inverse")
+    w1.metric("Stress-test year-1 net", eur_k(stress["net"]), f"{(stress['net'] - R['net']) / 1000:+,.1f}k vs current")
+    w2.metric("Does the case still hold?", "Yes" if held else "No",
+              f"savings are {ratio:.1f}x the cost" if held else f"savings cover only {ratio * 100:.0f}% of the cost",
+              delta_color="normal" if held else "inverse")
 
     st.markdown("---")
     st.subheader("Cash share × time cut: year-1 net value (€k)")
