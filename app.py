@@ -431,7 +431,7 @@ with tab3:
     with p1:
         st.markdown(
             "<div class='uc'><h4>Switzerland's largest retailer runs BLP in accounts payable</h4>"
-            "<div class='row'><span>Selection</span><b>Chosen after a trial on 500 real invoices</b></div>"
+            "<div class='row'><span>Selection</span><b>Selected after onsite tests with 10 and 300 invoices</b></div>"
             "<div class='row'><span>Speed</span><b>First Migros company live 7–8 weeks after signing</b></div>"
             "<div class='row'><span>SAP integration</span><b>About 3 days</b></div>"
             "<div class='row'><span>Effort</span><b>30–40% fewer resources needed</b></div>"
@@ -442,11 +442,11 @@ with tab3:
         st.markdown(
             "**Proof and sources**\n\n"
             "- [BLP customer page: Migros](https://blp.digital/resources/our-customers/migros)\n"
-            "- [IHL Group analysis of the Migros rollout](https://www.ihlservices.com/?p=42687)\n"
+            "- [IHL Group analysis of the Migros rollout](https://www.ihlservices.com/news/analyst-corner/2026/04/when-ai-agents-meet-real-enterprise-complexity/)\n"
             "- [BLP funding news, with Migros quote](https://pulse2.com/blp-digital-50-million-investment-from-goldman-sachs-alternatives-to-scale-agentic-ai-for-core-finance-processes/)"
         )
-        st.caption("How we use it: it supports our 3-day ERP integration assumption and shows the tool works with SAP. "
-                   "The 30–40% effort reduction is below our 50–70% scenarios, so it does not validate them.")
+        st.caption("How we use it: Migros supports a comparable 3-day SAP integration, not a guaranteed project duration. "
+                   "Its 30–40% resource reduction is different from our 50–70% touch-time scenarios, so it does not validate them.")
 
     d1, d2 = st.columns(2)
     with d1:
@@ -469,7 +469,9 @@ with tab3:
 # ---- Tab 4: all 21 assumptions -------------------------------------------------
 with tab4:
     st.subheader("All 21 rated assumptions in this study")
-    FAQ = ("blp.digital FAQ", "https://blp.digital/resources/faqs")
+    IW = ("IW Consult (invoice time study)", "https://www.iwkoeln.de/fileadmin/user_upload/Studien/Gutachten/PDF/2025/IWC-Studie-Wenn-sich-Digitalisierung-rechnet.pdf")
+    AEO = ("Aequo AP (modelled touch time)", "https://www.aequoap.com/research/invoice-processing-time-benchmarks")
+    USF = ("USFarathane (60k invoices/yr)", "https://documentpeople.dk/en/case-studies/usfarathane/")
     MIG = ("BLP Migros case", "https://blp.digital/resources/our-customers/migros")
     KLI = ("Klippa prices", "https://www.klippa.com/en/invoice-processing/prices/")
     ISR = ("ISR offer", "https://isr.de/en/technologies/isr/accounts-payable-flow/offer/")
@@ -477,25 +479,27 @@ with tab4:
     G1, G2, G3, G4, G5, G6 = ("Invoice volume and touch time", "Labour and capacity", "Savings levers",
                               "BLP price (assumed)", "One-time rollout effort", "Public price references")
     A = [
-        (G1, "Direct material invoices (PO)", f"{P['vols'][0]:,} / yr · {P['mins'][0]} min", "Low", FAQ),
-        (G1, "Indirect purchases / services (PO)", f"{P['vols'][1]:,} / yr · {P['mins'][1]} min", "Low", FAQ),
+        (G1, "Direct material invoices (PO)", f"{P['vols'][0]:,} / yr · {P['mins'][0]} min", "Low", IW),
+        (G1, "Indirect purchases / services (PO)", f"{P['vols'][1]:,} / yr · {P['mins'][1]} min", "Low", AEO),
         (G1, "Freight and logistics", f"{P['vols'][2]:,} / yr · {P['mins'][2]} min", "Low",
-         ("GoComet", "https://www.gocomet.com/products/freight-invoice-reconciliation")),
-        (G1, "Non-PO and other expenses", f"{P['vols'][3]:,} / yr · {P['mins'][3]} min", "Low", MIG),
+         ("GoComet (workflow only)", "https://www.gocomet.com/products/freight-invoice-reconciliation")),
+        (G1, "Non-PO and other expenses", f"{P['vols'][3]:,} / yr · {P['mins'][3]} min", "Low", AEO),
         (G1, "Total annual invoices", f"{R['invoices']:,}", "Medium",
-         ("AequoAP benchmarks", "https://www.aequoap.com/research/invoice-processing-time-benchmarks")),
+         USF),
         (G2, "Employer labour cost", f"€{P['labour']} / hour", "Medium",
          ("Destatis 2025", "https://www.destatis.de/DE/Presse/Pressemitteilungen/2026/04/PD26_148_624.html")),
         (G2, "Productive AP hours per FTE", f"{P['prod_hours']:,} h / year", "Low", NOSRC),
-        (G3, "Manual touch-time reduction", f"{P['time_cut'] * 100:.0f}%  (scenarios 50 / 60 / 70%)", "Low", MIG),
-        (G3, "Freed hours converted into cash", f"{P['share'] * 100:.0f}%  (scenarios 40 / 50 / 60%)", "Low", MIG),
+        (G3, "Manual touch-time reduction", f"{P['time_cut'] * 100:.0f}%  (scenarios 50 / 60 / 70%)", "Low",
+         ("BLP Migros (resource KPI only)", "https://blp.digital/resources/our-customers/migros")),
+        (G3, "Freed hours converted into cash", f"{P['share'] * 100:.0f}%  (scenarios 40 / 50 / 60%)", "Low", NOSRC),
         (G4, "Platform fee", f"€{P['platform']:,} / month", "Low", KLI),
         (G4, "Usage fee on every invoice", f"€{P['usage']:.2f} / invoice", "Low", KLI),
         (G4, "Total one-time implementation", eur(P["setup"]), "Low", ISR),
         (G5, "ERP integration + connector validation", f"{P['days'][0]} days", "Low", MIG),
-        (G5, "Workflow setup + configuration", f"{P['days'][1]} days", "Low", FAQ),
-        (G5, "User testing + training", f"{P['days'][2]} days", "Low", ISR),
-        (G5, "Go-live assistance", f"{P['days'][3]} days", "Low", ISR),
+        (G5, "Workflow setup + configuration", f"{P['days'][1]} days", "Low", NOSRC),
+        (G5, "User testing + training", f"{P['days'][2]} days", "Low",
+         ("ISR (training scope, not days)", "https://isr.de/en/technologies/isr/accounts-payable-flow/offer/")),
+        (G5, "Go-live assistance", f"{P['days'][3]} days", "Low", NOSRC),
         (G5, "Consultant hours per day", f"{P['hrs_day']} h", "Medium", NOSRC),
         (G6, "Klippa Premium plan (up to 12k invoices)", "€275 / month", "High", KLI),
         (G6, "Klippa extra-invoice price", "from €0.28 / invoice", "High", KLI),
